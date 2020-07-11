@@ -1,0 +1,127 @@
+---
+title: "Demo landscape metrics on a built-in R raster dataset"
+author: "Valentin Stefan"
+date: "First created: 11 July 2020; Last update: `r format(Sys.time(), '%d %B %Y')`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    code_fold: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=TRUE)
+knitr::opts_chunk$set(warning=FALSE, message=FALSE, cache=TRUE)
+```
+
+```{r}
+# for basic example
+library(raster)
+library(landscapemetrics)
+# for some more fancy example
+library(dplyr)
+library(purrr)
+library(ggplot2)
+library(plotly)
+
+library(knitr)
+library(kableExtra)
+```
+
+This is a demo for computing some landscape metrics on the built-in raster dataset `landscapemetrics::augusta_nlcd`
+
+# Basic example
+
+The raster must have the land use classes encoded as integers and must be projected in a metric coordinate system (meters, not degrees).
+
+General checkup if the raster fulfill the conditions to be used (e.g.: is it projected, does it have a CRS, etc.):
+
+```{r}
+check_landscape(landscapemetrics::augusta_nlcd) %>% 
+  knitr::kable() %>% 
+  kable_styling()
+```
+
+Create a data frame with all the landscape metrics that can be computed. Use the name provided in the column function_name in the "what" argument of sample_lsm() function below. I arbitrarily chose some metrics (more or less arbitrarily). I know that edge metrics are really important for biodiversity - see citations in Dauber 2010 (relevant extract below) and Kyere 2020 in the shared litarature dropbox folder - link is on Slack.
+
+> In addition, the shape of a stand and the relative edge-to-stand area relationship can affect biodiversity. Plant species richness decreases from the edges towards the central parts of poplar stands (Weih et al., 2003) and the possibility of plant propagules entering a SRC plantation does to some extent depend on the shape of the stand, with long, narrow stands having longer edges into which seeds could enter via wind or animal dispersal (Gustafsson, 1987). Also, species diversity of small mammals and birds was found to be higher in the borders of Miscanthus fields compared with the centres (Semere & Slater, 2007a). (from Dauber, 2010).
+
+These are all possible metrics that can be computed. We do not use all of them as it will be overkill:
+```{r}
+landscape_metrics_available <- list_lsm(level = "landscape") %>% dplyr::arrange(type)
+
+knitr::kable(landscape_metrics_available) %>% 
+  kable_styling() %>%
+  scroll_box(width = "100%", height = "300px")
+```
+
+These are some selected metrics we could use:
+```{r}
+metrics_of_interest <- c("lsm_l_ed", "lsm_l_te", "lsm_l_ta",
+                         # patch area mean, sd and coefficient of variation (looks like it at least)
+                         "lsm_l_area_mn", "lsm_l_area_sd", "lsm_l_area_cv", 
+                         "lsm_l_pd", "lsm_l_shdi")
+
+landscape_metrics_available %>% 
+  filter(function_name %in% metrics_of_interest) %>% 
+  knitr::kable() %>% 
+  kable_styling()
+```
+
+Make a fake point (a hypothetical location for a biomass plant). A circular buffer will be used to compute the landscape metrics within that buffer. Can also be multiple points and also can be a spatial object not only a matrix of projected coordinates:
+```{r}
+pts <- matrix(data = c(mean(c(augusta_nlcd@extent@xmin, augusta_nlcd@extent@xmax)),
+                       mean(c(augusta_nlcd@extent@ymin, augusta_nlcd@extent@ymax))),
+              ncol = 2)
+
+plot(augusta_nlcd); points(pts, cex = 2, pch = 16)
+```
+
+Get landscape metrics as data frame:
+```{r}
+metrics <- sample_lsm(landscape = augusta_nlcd,
+                      y = pts, 
+                      shape = "square", # buffer shape
+                      size = 5000,      # meters - half of the side-length of the buffer
+                      what = metrics_of_interest) 
+
+metrics <- left_join(metrics, landscape_metrics_available, by = "metric")
+knitr::kable(metrics) %>% kable_styling()
+```
+
+# Metrics for several buffer sizes
+
+Try several buffer sizes and visualize interactively how the metrics vary with that.
+
+```{r}
+sizes <- seq(from = 10^3, to = 10^4, by = 10^3)
+
+metrics_radii <- sizes %>% 
+  set_names() %>% 
+  map_dfr(~ sample_lsm(landscape = augusta_nlcd,
+                       y = pts, 
+                       shape = "square",
+                       size = .,
+                       what = metrics_of_interest), 
+          .id = "sizes")
+
+metrics_radii_4_ggplot <- left_join(x = metrics_radii,
+                                    y = landscape_metrics_available,
+                                    by = "metric") %>% 
+  mutate(sizes = as.integer(sizes),
+         facet = paste(name, metric, sep = " - "))
+```
+
+Make interactive plot:
+```{r}
+metrics_plot_radii <- metrics_radii_4_ggplot %>% 
+  ggplot(aes(x = sizes,
+             y = value)) +
+  geom_point() +
+  geom_line() +
+  facet_wrap(~ facet, scales = "free") +
+  labs(x = "Side-length of square buffer (m)") +
+  theme_bw()
+
+ggplotly(metrics_plot_radii)
+```

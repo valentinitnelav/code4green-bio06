@@ -1,0 +1,6 @@
+*.html
+landscape_metrics_demo_basic_cache
+landscape_metrics_demo_basic_files
+landscape_metrics_demo_for_given_crops_cache
+landscape_metrics_demo_for_given_crops_files
+LandCoverParcelsFasterized.tif

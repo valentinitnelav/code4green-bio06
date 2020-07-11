@@ -1,0 +1,106 @@
+---
+title: "Demo landscape metrics on a raster dataset prepared by Niko"
+author: "Valentin Stefan"
+date: "First created: 11 July 2020; Last update: `r format(Sys.time(), '%d %B %Y')`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    code_fold: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=TRUE)
+knitr::opts_chunk$set(warning=FALSE, message=FALSE, cache=TRUE)
+```
+
+```{r}
+# for basic example
+library(raster)
+library(landscapemetrics)
+# for some more fancy example
+library(dplyr)
+library(purrr)
+library(ggplot2)
+library(plotly)
+
+library(knitr)
+library(kableExtra)
+```
+
+
+# Landscape metrics for given location and buffer size
+
+The raster must have the land use classes encoded as integers and must be projected in a metric coordinate system (meters, not degrees).
+
+General checkup if the raster fulfill the conditions to be used (e.g.: is it projected, does it have a CRS, etc.):
+
+```{r}
+rst <- raster("LandCoverParcelsFasterized.tif")
+# rst <- raster("./sandbox/LandCoverParcelsFasterized.tif")
+crs(rst) <- CRS('+init=EPSG:32632')
+```
+
+Make a fake point (a hypothetical location for a biomass plant). A circular buffer will be used to compute the landscape metrics within that buffer. Can also be multiple points and also can be a spatial object not only a matrix of projected coordinates:
+```{r}
+pts <- matrix(data = c(720000, 5630000), ncol = 2)
+
+plot(rst); points(pts, cex = 2, pch = 16)
+```
+
+Get landscape metrics as data frame:
+```{r}
+landscape_metrics_available <- list_lsm(level = "landscape")
+
+metrics_of_interest <- c("lsm_l_ed", "lsm_l_te", "lsm_l_ta",
+                         "lsm_l_area_mn", "lsm_l_area_sd", "lsm_l_area_cv", 
+                         "lsm_l_pd", "lsm_l_shdi")
+
+metrics <- sample_lsm(landscape = rst,
+                      y = pts, 
+                      shape = "square", # buffer shape
+                      size = 5000,      # meters - half of the side-length of the buffer
+                      what = metrics_of_interest) 
+
+metrics <- left_join(x = metrics,
+                     y = landscape_metrics_available,
+                     by = "metric")
+knitr::kable(metrics) %>% kable_styling()
+```
+
+# Metrics for several buffer sizes
+
+Try several buffer sizes and visualize interactively how the metrics vary with that.
+
+```{r}
+sizes <- seq(from = 10^3, to = 10^4, by = 10^3)
+
+metrics_radii <- sizes %>% 
+  set_names() %>% 
+  map_dfr(~ sample_lsm(landscape = rst,
+                       y = pts, 
+                       shape = "square",
+                       size = .,
+                       what = metrics_of_interest), 
+          .id = "sizes")
+
+metrics_radii_4_ggplot <- left_join(x = metrics_radii,
+                                    y = landscape_metrics_available,
+                                    by = "metric") %>% 
+  mutate(sizes = as.integer(sizes),
+         facet = paste(name, metric, sep = " - "))
+```
+
+Make interactive plot:
+```{r}
+metrics_plot_radii <- metrics_radii_4_ggplot %>% 
+  ggplot(aes(x = sizes,
+             y = value)) +
+  geom_point() +
+  geom_line() +
+  facet_wrap(~ facet, scales = "free") +
+  labs(x = "Side-length of square buffer (m)") +
+  theme_bw()
+
+ggplotly(metrics_plot_radii)
+```

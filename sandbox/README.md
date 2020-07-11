@@ -1,0 +1,1 @@
+This directory should be used only for testing ideas, minimal examples, exploratory stuff, fun stuff.
