@@ -13,7 +13,9 @@ library(leafsync)
 # User interface ----------------------------------------------------------
 
 ui <- fluidPage(
-  mapviewOutput(outputId = "map"),
+  mapviewOutput(outputId = "map1"),
+  mapviewOutput(outputId = "map2"),
+  mapviewOutput(outputId = "map3"),
   actionButton(inputId = "go", label = "Compute"),
   plotOutput(outputId = "plot")
 )
@@ -58,19 +60,14 @@ server <- function(input, output) {
       theme_bw()
   })
   
-  output$map <- renderMapview({
-    # Read polygons with crop data
-    polys <- read_sf("AOIParcelsWithInfo.shp")
-    
-    polys <- polys %>% select(land_cover = LndCvrT,
-                              matches("Crops"))
-    
-    leafsync::sync(
-      mapview(polys, zcol = "Crops1"),
-      mapview(polys, zcol = "Crops2"),
-      mapview(polys, zcol = "Crops3")
-    )
-  })
+  # Read polygons with crop data
+  polys <- read_sf("AOIParcelsWithInfo.shp") %>% 
+    select(land_cover = LndCvrT,
+           matches("Crops"))
+  
+  output$map1 <- renderMapview({ mapview(polys, zcol = "Crops1") })
+  output$map2 <- renderMapview({ mapview(polys, zcol = "Crops2") })
+  output$map3 <- renderMapview({ mapview(polys, zcol = "Crops3") })
 }
 
 shinyApp(ui = ui, server = server)
