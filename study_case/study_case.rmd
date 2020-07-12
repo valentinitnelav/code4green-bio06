@@ -1,6 +1,6 @@
 ---
 title: "Study case of three crop scenarios - landscape metrics"
-author: "Team BioDiv06"
+author: "team_cli07_landscapeoptimizer"
 date: "12 July 2020"
 output:
   html_document:
