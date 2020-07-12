@@ -13,10 +13,18 @@ library(leafsync)
 # User interface ----------------------------------------------------------
 
 ui <- fluidPage(
-  mapviewOutput(outputId = "map1"),
-  mapviewOutput(outputId = "map2"),
-  mapviewOutput(outputId = "map3"),
-  actionButton(inputId = "go", label = "Compute"),
+  titlePanel("Crop scenarios - loading ..."),
+  h5("Be patient, the service is provided for free. It takes few seconds :)"),
+  fluidRow(
+    splitLayout(
+      cellWidths = c("33%", "33%", "33%"),
+      mapviewOutput(outputId = "map1"),
+      mapviewOutput(outputId = "map2"),
+      mapviewOutput(outputId = "map3")
+    )
+  ),
+  titlePanel("Landscape diversity metrics"),
+  actionButton(inputId = "go", label = "Compute metrics"),
   plotOutput(outputId = "plot")
 )
 
