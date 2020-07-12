@@ -1,8 +1,19 @@
 This repository contains code and data used during the hackathon Code4Green by the team team_cli07_landscapeoptimizer (initial team name - Bio06).
 
-The directory **study_case** contains the spatial data and the code used to generate the [html report](https://rpubs.com/valentin/study-case) presented in Devpost for evaluation.
+# Check out our study case
 
-The directory **app_shiny_bio06** contains code and data for running online a simple interactive dashboard hosted on a Shiny server - [here: app_shiny_bio06](https://valentin-stefan.shinyapps.io/app_shiny_bio06/). Be patient, the hosting service is for free and therefore, a bit slower :) 
-The dashboard is in a minimalistic form, but currently acts as a proof of concept as also illustrated through the [study_case report](https://rpubs.com/valentin/study-case). The user would input data about her/his crops and then after clicking on “Calculate”, gets some graphs about landscape diversity metrics.
+[**Here is a report**](https://rpubs.com/valentin/study-case) on a study case of a user that would give as input three different crop scenarios.
 
-The directory **sandbox** was used only for testing ideas, minimal examples, exploratory stuff.
+[**Here is a minimal app/dashboard**](https://valentin-stefan.shinyapps.io/app_shiny_bio06/) that computes the landscape diversity metrics for three given crop scenarios. The dashboard is in a minimalistic form and currently acts as a proof of concept. The user would input data about her/his crops and then after clicking on "Calculate, gets some graphs about landscape diversity metrics.
+
+# Directories
+
+- **study_case** contains the spatial data and the code used to generate the [html report](https://rpubs.com/valentin/study-case);
+
+- **app_shiny_bio06** contains code and data for running online a simple interactive dashboard hosted on a Shiny server - [here: app_shiny_bio06](https://valentin-stefan.shinyapps.io/app_shiny_bio06/);
+
+- **BackendData** contains sample data used for the back-end calculations;
+
+- **DataPreparation** contains the scripts used for data cleaning and preparation
+
+- **sandbox** was used only for testing ideas, minimal examples, exploratory stuff.
