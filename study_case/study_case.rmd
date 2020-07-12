@@ -1,0 +1,83 @@
+---
+title: "Study case of three crop scenarios - landscape metrics"
+author: "Team BioDiv06"
+date: "12 July 2020"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    code_fold: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=TRUE)
+knitr::opts_chunk$set(warning=FALSE, message=FALSE, cache=TRUE)
+```
+
+```{r}
+library(raster)
+library(sf)
+library(landscapemetrics)
+
+library(dplyr)
+library(ggplot2)
+library(mapview)
+```
+
+# Scenarios
+
+The user would be able to generate several scenarios by assigning different crops to their agricultural patches.
+
+```{r, read-data}
+# Read rasters with crop data - to be used directly for landscapemetrics::sample_lsm()
+rst <- list.files(path = "data", pattern = "\\.tif", full.names = TRUE) %>% 
+  lapply(FUN = raster)
+
+# Read polygons with crop data
+polys <- read_sf("data/AOIParcelsWithInfo.shp")
+
+# Read biogas plant location
+load(file = "data/biogas.plant.sf.rda")
+pts <- as(biogas.plant.sf, Class = "Spatial")
+```
+
+Below one can see three different crop scenarios. Scenario 2 is an extreme example of when an user would decide to plant one single type of species on her/his agricultural patches (monocultures).
+```{r, plot-crops}
+polys <- polys %>% select(land_cover = LndCvrT,
+                          matches("Crops"))
+mapview(polys, zcol = "Crops1")
+mapview(polys, zcol = "Crops2")
+mapview(polys, zcol = "Crops3")
+```
+
+# Landscape diversity metrics
+
+The user will get statistics about some relevant landscape metrics like edge density which is correlated to species diversity. 
+
+The higher the edge density and patch density, the higher the species diversity within the area of study.
+
+The Shannon diversity index indicates the diversity of the landscape. In this case, scenario 2 (only maze) has the lowest diversity index, however a fair amount of edge and patch density.
+```{r, get-metrics}
+# Compute landscape metrics of interest
+landscape_metrics_available <- list_lsm(level = "landscape")
+metrics_of_interest <- c("lsm_l_ed", "lsm_l_pd", "lsm_l_shdi")
+
+metrics <- sample_lsm(landscape = rst,
+                      y = pts, 
+                      shape = "square",
+                      size = 1000,
+                      what = metrics_of_interest) %>% 
+  left_join(y = landscape_metrics_available,
+            by = "metric")
+```
+
+```{r, plot-metrics}
+ggplot(data = metrics,
+       aes(x = factor(layer),
+           y = value)) +
+  geom_col(fill = "gray70") +
+  facet_wrap(~ name, scales = "free") +
+  labs(x = "Scenario") +
+  theme_bw()
+```
+
