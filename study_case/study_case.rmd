@@ -56,7 +56,7 @@ The user will get statistics about some relevant landscape metrics like edge den
 
 The higher the edge density and patch density, the higher the species diversity within the area of study.
 
-The Shannon diversity index indicates the diversity of the landscape. In this case, scenario 2 (only maze) has the lowest diversity index, however a fair amount of edge and patch density.
+The Shannon diversity index indicates the diversity of the landscape. In this case, scenario 3 has the highest diversity index. Scenario 2 (maze only) surprisingly performs better than scenario 1.
 ```{r, get-metrics}
 # Compute landscape metrics of interest
 landscape_metrics_available <- list_lsm(level = "landscape")
@@ -65,7 +65,7 @@ metrics_of_interest <- c("lsm_l_ed", "lsm_l_pd", "lsm_l_shdi")
 metrics <- sample_lsm(landscape = rst,
                       y = pts, 
                       shape = "square",
-                      size = 1000,
+                      size = 2500,
                       what = metrics_of_interest) %>% 
   left_join(y = landscape_metrics_available,
             by = "metric")
