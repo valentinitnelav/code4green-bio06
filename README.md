@@ -1,10 +1,10 @@
-This repository contains code and data used during the hackathon Code4Green by the team team_cli07_landscapeoptimizer (initial team name - Bio06).
+This repository contains code and data used during the [Code4Green hackathon](https://www.bmu.de/en/service/events/wettbewerbe/code4green/) by the team team_cli07_landscapeoptimizer (initial team name - Bio06). The presentation of the project is on Devpost, [here](https://devpost.com/software/cli07_landscapeoptimizer).
 
 # Check out our study case
 
 [**Here is a report**](https://rpubs.com/valentin/study-case) on a study case of a user that would give as input three different crop scenarios.
 
-[**Here is a minimal app/dashboard**](https://valentin-stefan.shinyapps.io/app_shiny_bio06/) that computes the landscape diversity metrics for three given crop scenarios. The dashboard is in a minimalistic form and currently acts as a proof of concept. The user would input data about her/his crops and then after clicking on "Calculate, gets some graphs about landscape diversity metrics.
+[**Here is a minimal app/dashboard**](https://valentin-stefan.shinyapps.io/app_shiny_bio06/) that computes the landscape diversity metrics for three given crop scenarios. The dashboard is in a minimalistic form and currently acts as a proof of concept. The user would input data about her/his crops and then after clicking on "Calculate", gets some graphs about landscape diversity metrics.
 
 # Directories
 
